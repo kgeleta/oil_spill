@@ -43,15 +43,15 @@ class Cell:
 def initialize():
     # todo: refactor names
     global test, next_test
-    test = [[Cell(0, False, [0, 0, 0, 0], [0, 0, 0, 0]) for j in range(n)] for i in range(n)]
-    next_test = [[Cell(0, False, [0, 0, 0, 0], [0, 0, 0, 0]) for j in range(n)] for i in range(n)]
+    test = [[Cell(0, False, [10, 0, 0, 0], [0, 0, 0, 0]) for j in range(n)] for i in range(n)]
+    next_test = [[Cell(0, False, [10, 0, 0, 0], [0, 0, 0, 0]) for j in range(n)] for i in range(n)]
     for x in range(n):
         for y in range(n):
-            if 47 < x < 53 and 45 < y < 53:
+            if 35 < x < 40 and 35 < y < 40:
                 test[x][y].land = True
-            if 48 < x < 52 and y > 30:
-                test[x][y].wind = [0, 0, 0, 10]
-                test[x][y].current = [0, 0, 0, 2.5]
+            if x < 45:
+                test[x][y].wind = [0, 0, 0, 0]
+                test[x][y].current = [0, 0, 1.5, 0]
             if 45 < x < 55 and 25 < y < 35:
                 test[x][y].mass = 99
 
@@ -81,21 +81,22 @@ def update():
 
                     # if neighbor is not a land:
                     # cardinal directions:
-                    if not test[i-1][j].land:
-                        w = ((test[i][j].current[WEST] + test[i-1][j].current[WEST])/2/current_max) +\
-                            R_w * ((test[i][j].wind[WEST] + test[i-1][j].wind[WEST])/2/wind_max)
+                    if not test[i-1][j].land:# SOUTH
+                        w = ((test[i][j].current[SOUTH] + test[i-1][j].current[SOUTH])/2/current_max) +\
+                            R_w * ((test[i][j].wind[SOUTH] + test[i-1][j].wind[SOUTH])/2/wind_max)
                         next_test[i][j].mass += m*((1+w)*test[i-1][j].mass - (1-w)*test[i][j].mass)
-                    if not test[i+1][j].land:
-                        e = ((test[i][j].current[EAST] + test[i+1][j].current[EAST])/2/current_max) +\
-                            R_w * ((test[i][j].wind[EAST] + test[i+1][j].wind[EAST])/2/wind_max)
+                    if not test[i+1][j].land: # NORTH
+                        e = ((test[i][j].current[NORTH] + test[i+1][j].current[NORTH])/2/current_max) +\
+                            R_w * ((test[i][j].wind[NORTH] + test[i+1][j].wind[NORTH])/2/wind_max)
                         next_test[i][j].mass += m*((1+e)*test[i+1][j].mass - (1-e)*test[i][j].mass)
-                    if not test[i][j-1].land:
-                        s = ((test[i][j].current[SOUTH] + test[i][j-1].current[SOUTH])/2/current_max) +\
-                            R_w * ((test[i][j].wind[SOUTH] + test[i][j-1].wind[SOUTH])/2/wind_max)
+                    if not test[i][j-1].land: # EAST
+                        s = ((test[i][j].current[EAST] + test[i][j-1].current[EAST])/2/current_max) +\
+                            R_w * ((test[i][j].wind[EAST] + test[i][j-1].wind[EAST])/2/wind_max)
                         next_test[i][j].mass += m*((1+s)*test[i][j-1].mass - (1-s)*test[i][j].mass)
-                    if not test[i][j+1].land:
-                        # todo: wind + current:
-                        next_test[i][j].mass += m*(test[i][j+1].mass - test[i][j].mass)
+                    if not test[i][j+1].land:   # WEST
+                        north = ((test[i][j].current[WEST] + test[i][j+1].current[WEST])/2/current_max) +\
+                            R_w * ((test[i][j].wind[WEST] + test[i][j+1].wind[WEST])/2/wind_max)
+                        next_test[i][j].mass += m*((1+north)*test[i][j+1].mass - (1-north)*test[i][j].mass)
 
                     # intermediate directions:
                     if not test[i-1][j-1].land:
@@ -115,6 +116,7 @@ def update():
             else:
                 if not test[i][j].land:
                     # jesli sasiad jest ladem i masa na tym ladzie mniejsza od max - czesc masy osadza sie na ladzie
+                    # todo: m0 + P * m < C_max
                     if next_test[i - 1][j].land and next_test[i - 1][j].mass <= C_max:
                         next_test[i - 1][j].mass += P * next_test[i][j].mass
                         next_test[i][j].mass -= P * next_test[i][j].mass
@@ -168,6 +170,6 @@ def observe():
 initialize()
 
 for t in range(100):
-    if t % 20 == 0:
+    if t % 10 == 0:
         observe()
     update()
